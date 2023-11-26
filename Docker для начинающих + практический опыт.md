@@ -319,3 +319,124 @@ docker container inspect webapp
 ```bash
 docker container logs -f my-app
 ```
+
+# ✳ **Лабораторная №3 (IMAGES)**
+
+❓*Сколько `images` доступно на докер-хосте?*
+```bash
+docker images
+```
+```
+1
+```
+
+❓*Какой размер образа `ubuntu`?*
+```
+77.8MB
+```
+
+❓*Какой тег у нового образа `NGINX`?
+ИНФО: Мы только что спуллили новый образ.*
+```bash
+docker images
+1.19-alpine
+```
+
+❓*Мы только что скачали код приложения. Какой базовый образ используется в этом Dockerfile?
+Ищи Dockerfile в директории `/var/webapp-rockets`.*
+```bash
+vi /var/webapp-rockets/Dockerfile 
+или
+grep -i FROM /var/webapp-rockets/Dockerfile
+```
+
+```
+FROM python:3.6
+RUN pip install flask
+COPY . /opt/
+EXPOSE 8080
+WORKDIR /opt
+ENTRYPOINT ["python3", "app.py"]                   
+~                                                                     
+~                                                  
+"/var/webapp-rockets/Dockerfile" [readonly][noeol] 11L, 113C                          11,1          All
+```
+
+```
+python:3.6
+```
+
+❓*В какое расположение внутри контейнера будет скопирован исходный код во время создания образа?*
+```
+COPY . /opt/
+```
+
+❓*Когда контейнер создан с помощью этого Dockerfile, какая команда используется для запуска приложения внутри него?*
+```
+ENTRYPOINT ["python3", "app.py"]
+```
+
+❓*Какой `port` у приложения внутри контейнера?*
+```
+EXPOSE 8080
+```
+
+❓*Создай докер-образ используя этот Dockerfile и назови его `webapp-rockets`. Не присваивай никаких тегов.*
+```bash
+Ctrl+C
+:qa and enter
+cd /var/webapp-rockets/; docker build . -t webapp-rockets
+```
+
+❓*Запусти экземпляр образа `webapp-rockets` и опубликуй порт `8080` контейнера на `30082` порту докер-хоста.*
+```bash
+docker run -d -p 30082:8080 webapp-rockets
+```
+
+❓*Открой веб-приложение используя вкладку приложения в обучающем модуле.
+После выполнения ты можешь остановить работающий контейнер с помощью комбинации `CTRL + C` или командой `docker stop $(docker ps -q --filter ancestor=webapp-rockets)`.*
+
+❓*Какая базовая ОС использована в образе `python:3.6`?
+Если потребуется, ты всегда можешь запустить такой контейнер.
+docker run python:3.6 cat /etc/*release*
+```
+cat: /etc/lsb-release: No such file or directory
+PRETTY_NAME="Debian GNU/Linux 11 (bullseye)"
+NAME="Debian GNU/Linux"
+VERSION_ID="11"
+VERSION="11 (bullseye)"
+VERSION_CODENAME=bullseye
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
+```
+
+❓*Какой примерный размер образа `webapp-rockets`?*
+```bash
+docker images
+```
+```
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+webapp-rockets      latest              3987f5ea8cb8        5 minutes ago       914MB
+ubuntu              latest              e4c58958181a        7 weeks ago         77.8MB
+python              3.6                 54260638d07c        23 months ago       902MB
+nginx               1.19-alpine         a64a6e03b055        2 years ago         22.6MB
+```
+
+❓*Это действительно большой размер для образа. Докер-образы предполагаются как маленькие и легковесные. Давай немного обрежем его.*
+
+❓*Создай новый образ этого приложения, который будет поменьше. Измени старый Dockerfile, назови образ `webapp-rockets`, дай ему тег `lite`.
+Поищи базовый образ поменьше для python:3.6. Убедись, что размер готового образа будет меньше чем `150MB`.   
+Пароль для sudo - `selena`*
+```bash
+sudo nano Dockerfile
+ввести selena
+изменить FROM python:3.6-alpine
+docker build . -t webapp-rockets:lite
+```
+
+❓*Запусти новый контейнер из образа `webapp-rockets:lite` и прокинь порт `8080` контейнера на порт `30083` докер-хоста.*
+```bash
+docker run -d -p 30083:8080 webapp-rockets:lite
+```
