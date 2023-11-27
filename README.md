@@ -8,9 +8,11 @@
 + [Docker: Окружение для тестирования](https://habr.com/ru/articles/275513/)
 + [Введение в Docker для автоматизации тестирования](https://qarocks.ru/about-docker/)
 + [Docker для самых маленьких автоматизаторов](https://habr.com/ru/companies/maxilect/articles/548876/)
++ [Команды Docker CLI](https://docs.docker.com/engine/reference/commandline/docker/)
 
 ## Вопросы
 + [50 вопросов по Docker, которые задают на собеседованиях, и ответы на них](https://habr.com/ru/companies/slurm/articles/528206/)
 
 ## Practice
 + [Docker для начинающих + практический опыт](https://stepik.org/course/123300/promo)
+

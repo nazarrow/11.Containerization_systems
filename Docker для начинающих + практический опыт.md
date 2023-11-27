@@ -440,3 +440,92 @@ docker build . -t webapp-rockets:lite
 ```bash
 docker run -d -p 30083:8080 webapp-rockets:lite
 ```
+
+# ✳ **Лабораторная №4 (EnvVars)**
+
+❓*Исследуй переменные окружения в запущенном контейнере и определи значение переменной `ROCKET_SIZE`*
+
+```bash
+docker inspect zen_villani
+```
+
+```
+"Env": [
+                "ROCKET_SIZE=average",
+                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "LANG=C.UTF-8",
+                "GPG_KEY=0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D",
+                "PYTHON_VERSION=3.6.12",
+                "PYTHON_PIP_VERSION=20.2.4",
+                "PYTHON_GET_PIP_URL=https://github.com/pypa/get-pip/raw/fa7dc83944936bf09a0e4cb5d5ec852c0d256599/get-pip.py",
+                "PYTHON_GET_PIP_SHA256=6e0bb0a2c2533361d7f297ed547237caf1b7507f197835974c0dd7eba998c53c"
+            ]
+```
+
+❓*Запусти контейнер с именем `rocket-app` из образа `rotorocloud/simple-webapp-rockets` и установи переменную `ROCKET_SIZE` в значение `big`. Сделай приложение доступным на порту `30888` докер-хоста. Приложение в контейнере работает на `8080` порту.*
+
+```bash
+docker run -p 30888:8080 --name rocket-app -e ROCKET_SIZE=big -d rotorocloud/simple-webapp-rockets
+```
+
+❓*Посмотри на работу приложения, используя ссылку вверху своего обучающего модуля и убедись, что программа показывает верный размер ракеты.*
+
+❓*Разверни экземпляр базы `mysql` с помощью образа `mysql` и назови контейнер `mysql-db`.
+Для этого контейнера установи пароль `db_pass123`. Ты можешь посмотреть правильный образ mysql на Docker Hub и там же узнать, как правильно проинициализировать root-пароль для ее контейнеризированной версии.*
+
+    Name: mysql-db, Image: mysql, Env: MYSQL_ROOT_PASSWORD=db_pass123
+
+```bash
+docker run -d -e MYSQL_ROOT_PASSWORD=db_pass123 --name mysql-db mysql
+```
+
+❓*Узнай, сколько баз данных создано в контейнере с `mysql`
+База может подниматься около минуты.*
+
+```bash
+docker exec -i mysql-db mysql -uroot -pdb_pass123 <<< "show databases;"
+```
+
+```
+Database
+information_schema
+mysql
+performance_schema
+sys
+```
+
+```
+4
+```
+
+❓*Как видишь, без знания установленного пароля, база данных не дает совершать с собой никаких действий.
+При помощи переменных окружения инициализируются большинство контейнеризированных приложений.*
+
+❓*Попробуй cнова обратиться к базе и посмотри текущее значение переменной окружения `MYSQL_ROOT_PASSWORD`.
+ИНФО: Мы что-то изменили, детально исследуй контейнер*
+
+```
+```
+
+❓*Все верно, мы поменяли пароль в базе, но переменная осталась прежняя. Снова узнай, сколько баз данных создано в контейнере с `mysql`.
+ИНФО: Новый пароль `db_newpass123`.*
+
+```bash
+docker exec -i mysql-db mysql -uroot -pdb_newpass123 <<< "show databases;"
+```
+
+```
+Database
+ROTORO
+WAS_HERE
+information_schema
+mysql
+performance_schema
+sys
+```
+
+```
+6
+```
+
+❓*Как ты убедился, переменные окружения не всегда отражают текущее положение дел. Очень часто (но не всегда) они используются для первоначальной инициализации переменных в контейнере, а дальше контейнер живет своей жизнью.*
