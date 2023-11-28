@@ -529,3 +529,93 @@ sys
 ```
 
 ❓*Как ты убедился, переменные окружения не всегда отражают текущее положение дел. Очень часто (но не всегда) они используются для первоначальной инициализации переменных в контейнере, а дальше контейнер живет своей жизнью.*
+
+# ✳ **Лабораторная №5 (Commands and Entrypoints)**
+
+❓*Мы представили несколько `Dockerfiles` нескольких популярных продуктов в каталоге `/home/moon/`. Изучи их и ответь на несколько вопросов*
+
+```bash
+cd /home/moon/
+ls
+```
+
+❓*Какая `ENTRYPOINT` установлена для создания образа nosql базы данных?
+cat Dockerfile-mongodb*
+
+```bash
+FROM dockerfile/ubuntu
+```
+
+```
+Install MongoDB.
+RUN \
+  apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && \
+  echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' > /etc/apt/sources.list.d/mongodb.list && \
+  apt-get update && \
+  apt-get install -y mongodb-org && \
+  rm -rf /var/lib/apt/lists/*
+
+Define mountable directories.
+VOLUME ["/data/db"]
+
+Define working directory.
+WORKDIR /data
+
+Define default command.
+CMD ["mongod"]
+
+Expose ports.
+- 27017: process
+- 28017: http
+EXPOSE 27017
+```
+
+```
+ENTRYPOINT not set
+```
+
+❓*Какая `ENTRYPOINT` установлена для создания образа реляционной базы данных, коммюнити версии `mysql`?*
+
+```bash
+cat /home/moon/Dockerfile-mariadb
+```
+
+```
+ENTRYPOINT ["docker-entrypoint.sh"]
+```
+
+❓*Какая `CMD` установлена для создания образа системы управления контентом `wordpress`?*
+
+```bash
+cat /home/moon/Dockerfile-wordpress
+```
+
+```
+CMD ["apache2-foreground"]
+```
+
+❓*Какой будет окончательная команда при запуске контейнера из образа `wordpress` из данного Dockerfile? Прими во внимание и инструкцию `ENTRYPOINT`, и инструкцию `CMD`*
+
+```
+docker entrypoint and cmd
+```
+
+❓*Какая команда выполняется при запуске контейнера, созданного из Dockerfile с названием `ubuntu`?*
+
+```bash
+cat /home/moon/Dockerfile-ubuntu | grep CMD
+```
+
+```
+CMD ["bash"]
+```
+
+❓*Запусти контейнер из образа `ubuntu` и переопредели команду (CMD) для старта в контейнере, заменив ее на `sleep 1000` 
+Запусти это в `detached mode`.
+Ubuntu container run with empty entrypoint
+Ubuntu container run with 'sleep 1000' command*
+
+```bash
+docker run -d ubuntu sleep 1000
+```
+
