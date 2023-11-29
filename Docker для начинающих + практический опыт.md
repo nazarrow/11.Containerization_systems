@@ -319,7 +319,7 @@ docker container inspect webapp
 ```bash
 docker container logs -f my-app
 ```
-
+---
 # ✳ **Лабораторная №3 (IMAGES)**
 
 ❓*Сколько `images` доступно на докер-хосте?*
@@ -440,7 +440,7 @@ docker build . -t webapp-rockets:lite
 ```bash
 docker run -d -p 30083:8080 webapp-rockets:lite
 ```
-
+---
 # ✳ **Лабораторная №4 (EnvVars)**
 
 ❓*Исследуй переменные окружения в запущенном контейнере и определи значение переменной `ROCKET_SIZE`*
@@ -530,6 +530,7 @@ sys
 
 ❓*Как ты убедился, переменные окружения не всегда отражают текущее положение дел. Очень часто (но не всегда) они используются для первоначальной инициализации переменных в контейнере, а дальше контейнер живет своей жизнью.*
 
+---
 # ✳ **Лабораторная №5 (Commands and Entrypoints)**
 
 ❓*Мы представили несколько `Dockerfiles` нескольких популярных продуктов в каталоге `/home/moon/`. Изучи их и ответь на несколько вопросов*
@@ -618,4 +619,103 @@ Ubuntu container run with 'sleep 1000' command*
 ```bash
 docker run -d ubuntu sleep 1000
 ```
+---
+# ✳ **3.8 Тест: Images**
 
+❓*`Dockerfile`:*
+*FROM ubuntu:20.04 ** 
+*COPY . /app*  
+*RUN make /app*  
+*CMD python /app/app.py*
+*После сборки образ назвали `parser`. Что произойдет, если мы запустим команду: `docker run parser sleep 1h`?*
+
+```
+Docker изменит инструкцию CMD на 'sleep 1h'
+```
+
+❓*Выбери инструкцию CMD для команды `echo -n "My home is $HOME"`, которая выводит значение переменной окружения и считается **предпочитаемой**.*
+
+```bash
+CMD [ "sh", "-c", "echo -n My home is $HOME" ]
+```
+
+❓*Мы решили создать свой образ и в процессе его сборки требуется скачать файл с `https://rootfs.tar.xz` и автоматически распаковать пути `/`. Какую команду выбрать?*
+
+```
+ADD https://rootfs.tar.xz /
+```
+
+❓*Что поможет уменьшить размер образа?*
+
+- [x] Предотвращение копирования нежелательных файлов в контекст сборки при помощи '.dockerignore'
+- [ ] Объединить все инструкции с одинаковыми названиями в одну, например будет одна RUN, одна CMD и т.д.
+- [x] Установка только необходимых пакетов в образ
+- [ ] Объявление функций в Dockerfile
+- [x] Использовать multi-stage сборки
+- [x] Комбинирование нескольких инструкций в одну и очистка временных файлов в этой же инструкции
+
+❓*Как определить, что Dockerfile содержит в себе multi-stage?*
+
+```
+В Dockerfile присутствуют несколько инструкций FROM
+```
+
+❓*`Dockerfile`:
+FROM golang:1.12-alpine as builder
+ENV GO111MODULE=on
+WORKDIR /app  
+COPY . .
+RUN apk --no-cache add git alpine-sdk build-base gcc
+RUN go get \  
+    && go get golang.org/x/tools/cmd/cover \  
+    && go get github.com/mattn/goveralls
+RUN go build -o example cmd/example/main.go
+FROM alpine:latest  
+RUN apk --no-cache add ca-certificates  
+WORKDIR /root/  
+COPY --from=**<неизвестно>** /app/example .  
+CMD ["./example"]
+****Изучи Dockerfile. Какое значение нужно добавить после флага `--from` во второй стадии сборки, чтобы скомпилированный бинарник go-приложения из первой стадии был помещен в финальный образ?***
+
+```
+builder
+```
+
+❓*Какая команда напечатает значения 'Architecture' и 'Os' образа с названием `rockets`?*
+
+```bash
+docker image inspect rockets -f '{{.Os}} {{.Architecture}}'
+```
+
+❓*Если мы используем `CMD` для предоставления аргумента по умолчанию для инструкции `ENTRYPOINT`, то должны быть указаны обе инструкции, как `CMD`, так и `ENTRYPOINT`?*
+
+```
+Да
+```
+
+❓*Какая команда удалит все неиспользуемые образы на докер-хосте?*
+
+```bash
+docker image prune -a
+```
+
+❓*У нас есть директория с 
+$ tree /opt/prj01/  
+/opt/prj01/  
+|-- Dockerfile  
+|-- v1  
+|   `-- app.py  
+`-- v2  
+    `-- app.py
+Как собрать образ при помощи Dockerfile из директории `/opt/prj01/`, используя для контекста путь `/opt/prj01/v2` и назвать этот образ `app:v2`?*
+
+```bash
+docker build /opt/prj01/v2 -f /opt/prj01/Dockerfile -t app:v2
+```
+
+❓*Как увидеть список всех слоев образа `redis` вместе с размером каждого слоя?*
+
+```bash
+docker image history redis
+```
+---
