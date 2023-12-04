@@ -719,3 +719,175 @@ docker build /opt/prj01/v2 -f /opt/prj01/Dockerfile -t app:v2
 docker image history redis
 ```
 ---
+# ✳ **4.2 Тест: Compose**
+
+❓*При помощи чего мы можем настроить контейнеры и связь между ними используя декларативный подход?*
+
+```
+Docker Compose
+```
+
+❓*Какой YAML-файл, содержащий описание services, networks и volumes для развертывания контейнеризированного приложения, обычно используется?*
+
+```
+docker-compose.yaml
+```
+
+❓*Какая команда используется для создания и запуска контейнеров на переднем плане, используя готовый файл `docker-compose.yaml`?*
+
+```
+docker-compose up
+```
+
+❓*Какая команда используется для создания и запуска контейнеров на заднем плане, используя готовый файл `docker-compose.yaml`?*
+
+- [ ] docker-compose up --background
+- [x] docker-compose up -d
+- [x] docker-compose up --detach
+- [ ] docker-compose up
+
+❓*Как посмотреть список созданных compose контейнеров?*
+
+```bash
+docker-compose ps
+```
+
+❓*Какая команда поможет в проверке логов всего стека, указанного в `docker-compose.yaml`?*
+
+```
+docker-compose logs
+```
+
+❓*Какой командой можно остановить (не удаляя) весь стек контейнеров, описанных в compose-файле?*
+
+```
+docker-compose stop
+```
+
+❓*Какой командой можно удалить весь стек контейнеров, описанных в compose-файле?*
+
+```
+docker-compose down
+```
+
+❓*Как используется поле `version` в compose-файле? (выбери 3)*
+
+- [x] docker-compose использует максимально последнюю подходящую схему, не ориентируясь на версию
+- [ ] docker-compose использует эту версию для выбора точной схемы проверки compose-файла
+- [x] Поле версии носит лишь информативный характер
+- [x] docker-compose анализирует файл и самостоятельно принимает решение о том, по схеме какой версии работать
+- [ ] Это важный параметр, обеспечивающий обратную совместимость, на него полагается docker-compose
+
+❓*Compose-файлы версий 2 и 3 должны явно указывать свою версию в корневом разделе YAML документа?*
+
+```
+Да
+```
+
+❓*Используя команду `docker-compose up` мы можем поднять несколько контейнеров на разных докер-хостах?*
+
+```
+Нет
+```
+
+❓*`docker-compose.yaml`:
+version: "3.8"  
+services:  
+  web:  
+    build: .  
+    depends_on:  
+      - db  
+      - redis  
+    volumes:  
+      - .:/code  
+      - logvolume01:/var/log  
+    ports:  
+      - "8080:80"  
+  redis:  
+    image: redis  
+  db:  
+    image: postgres  
+volumes:  
+  logvolume01: {}
+На какой порт хоста будет выставлено приложение при исполнении `docker-compose up -d`?*
+
+```
+8080
+```
+
+❓*`docker-compose.yaml`:
+version: "3.8"  
+services:  
+  web:  
+    build: .  
+    depends_on:  
+      - db  
+      - redis  
+    volumes:  
+      - .:/code  
+      - logvolume01:/var/log  
+    ports:  
+      - "8080:80"  
+  redis:  
+    image: redis  
+  db:  
+    image: postgres  
+volumes:  
+  logvolume01: {}
+Что из утверждений верно?*
+
+```
+Образ web будет собран, а образы redis и postgres будут скачаны с Dockerhub, если их еще нет на хосте
+```
+
+❓*`docker-compose.yaml`:
+version: "3.8"  
+services:  
+  web:  
+    build: .  
+    depends_on:  
+      - db  
+      - redis  
+    volumes:  
+      - .:/code  
+      - logvolume01:/var/log  
+    ports:  
+      - "8080:80"  
+  redis:  
+    image: redis  
+  db:  
+    image: postgres  
+volumes:  
+  logvolume01: {}
+Что можно сказать о монтированиях для службы `web` в этом compose-файле?*
+_Примечание: о монтировании мы будем говорить в теме хранения_*
+
+```
+/code это Bind Mount, /var/log это Volume mount
+```
+
+❓*`docker-compose.yaml`:
+version: "3.8"  
+services:  
+  web:  
+    build: .  
+    depends_on:  
+      - db  
+      - redis  
+    volumes:  
+      - .:/code  
+      - logvolume01:/var/log  
+    ports:  
+      - "8080:80"  
+  redis:  
+    image: redis  
+  db:  
+    image: postgres  
+volumes:  
+  logvolume01: {}
+Что из утверждений верно об этом файле?*
+
+```
+Службы redis и db должны будут запуститься до службы web
+```
+---
