@@ -891,3 +891,85 @@ volumes:
 Службы redis и db должны будут запуститься до службы web
 ```
 ---
+# ✳ **Лабораторная №6 (Docker Compose)**
+
+❓*Создай экземпляр базы данных `postgres` в контейнере с названием `db`, образ `postgres`, переменные окружения `POSTGRES_PASSWORD=mysecretpassword`
+Container "db" running with env variable POSTGRES_PASSWORD?*
+
+```bash
+docker run --name db -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+```
+
+❓*Теперь создай простой контейнер с `wordpress`, он должен называться `wordpress`, образ: `wordpress`, сделай `link` этому контейнеру к контейнеру с именем `db` выставь `30085` порт на докер-хост
+
+```bash
+docker run -d --name=wordpress --link db:db -p 30085:80 wordpress
+```
+
+❓*Сейчас у нас уже развернут рабочий сайт на `wordpress`, ты можешь посмотреть на него через вкладку в терминале. Давай теперь сделаем это с помощью `Docker Compose`!
+Если ты видишь ответ `Страница недоступна`, поменяй в URL протокол на `https`*
+
+```
+OK
+```
+
+❓*Сначала надо прибрать за собой, давай удалим все, что осталось от предыдущих шагов.
+Удали все контейнеры - `db` и `wordpress`
+
+```bash
+docker ps
+docker stop wordpress db
+docker rm wordpress db
+```
+
+❓*Создай файл `docker-compose.yml` в размещении `/root/wordpress`. Обрати внимание, размещение должно быть `/root/wordpress/docker-compose.yml`, иначе система не сможет правильно проверить результат. Сделай `sudo -i`, пароль `selena`. После этого запусти стек с помощью `docker-compose` в `detached mode`.
+Важно, чтобы в файле спецификация была такой же, как и раньше, т.е. контейнеры были `wordpress` и `db` и не забудь прокинуть нужные порты*
+
+```
+sudo -i
+selena
+
+nano docker-compose.yml
+version: '3.0'
+services:
+  db:
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    image: postgres
+  wordpress:
+    image: wordpress
+    links:
+    - db
+    ports:
+    - 30085:80
+
+docker-compose up -d
+```
+
+
+❓*Мы что-то поменяли, сколько реплик контейнеров в службе `wordpress`?*
+
+```bash
+docker-compose ps
+```
+
+```
+0
+```
+
+❓*Увеличь количество реплик `wordpress` до 2.
+Пользуйся средствами `docker-compose`*
+
+```bash
+docker-compose up -d --scale wordpress=2
+docker-compose ps
+```
+
+❓*Останови стек `docker-compose`.
+Убедись, что `Docker Compose` корректно положил стек*
+
+```bash
+docker-compose down
+docker-compose ps
+```
+
