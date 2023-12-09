@@ -1249,25 +1249,204 @@ docker volume prune
 ---
 # ✳ **Лабораторная №9 (Docker Networks)**
 
-❓**
+❓*Исследуй текущее окружение Docker и определи, какое количество `networks` присутствует в системе*
 
+```bash
+docker network ls
 ```
 
 ```
+3
+```
 
+❓*Какой `ID` соответствует мостовой сети (`bridge network`)?*
+
+```bash
+docker network ls --no-trunc
+```
+
+```
+d436476e93be1ff30721f17f9cb366639ff21fe5421c0e9fe29e6ade10e9fe35
+```
+
+❓*Мы только что запустили контейнер с названием `alpine-1`. Определи к какой сети он присоединен.*
+
+```bash
+docker inspect alpine-1
+```
+
+```
+"host"
+```
+
+❓*Какая подсеть сконфигурирована в сети `bridge`?*
+
+```bash
+docker network inspect bridge
+```
+
+```
+"Subnet": "172.20.230.0/24"
+```
+
+❓*Запусти контейнер с названием `alpine-2` с помощью образа `alpine` и прикрепи его к сети `none`.*
+
+```bash
+docker run -d --name alpine-2 --network=none alpine sleep 100
+```
+
+❓*Создай новую сеть с названием `wp-mysql-network`, которая будет использовать сетевой драйвер `bridge`. Назначь ей `172.22.0.0/24` подсеть. Настрой `Gateway 172.22.0.1`*
+
+```bash
+docker network create --driver bridge --subnet 172.22.0.0/24 --gateway 172.22.0.1 wp-mysql-network
+```
+
+❓*Разверни базу `mysql` с помощью образа `mysql`. Контейнер должен называться `mysql-db`. Прикрепи его к только что созданной сети `wp-mysql-network`
+Установи пароль для использования базы данных `db_pass123`. Переменная окружения, ответственная за это `MYSQL_ROOT_PASSWORD`*
+
+```bash
+docker run -d -e MYSQL_ROOT_PASSWORD=db_pass123 --name mysql-db --network wp-mysql-network mysql
+```
+
+❓*Разверни веб-приложение с названием `webapp`, используй образ `rotorocloud/webapp-mysql`. Выставь (`Expose`) порт 30080 на хост. Приложение использует переменную окружения `DB_Host` в качестве имени хоста базы данных mysql. Убедись, что прикрепил вновь созданную сеть `wp-mysql-network`*
+
+```bash
+docker run --network=wp-mysql-network -e DB_Host=mysql-db -e DB_Password=db_pass123 -p 30080:8080 --name webapp -d rotorocloud/webapp-mysql
+```
+
+❓*Если ты все сделал правильно, ты увидишь работу приложения нажав на значок приложения своего обучающего модуля. Там будет сообщение, что ракета взлетела.*
+
+```
+Ok
+```
 ---
 # ✳ **6.3 Тест: Docker Network**
 
-❓**
+❓*Как получить список доступных по умолчанию сетей в Docker?*
 
+```bash
+docker network ls
 ```
 
+❓*Какой командой можно посмотреть настройки сети и назначенный IP-адрес контейнера с id `7206cfc5e8ae` и образом `redis`?*
+
+```bash
+docker inspect 7206cfc5e8ae
+```
+
+❓*Какой сетевой драйвер будет использован по умолчанию, если ты не указал его явно?*
+
+```
+bridge
+```
+
+❓*Какой тип сети следует выбрать, чтобы сетевой стек контейнера не был изолирован от хоста, а использовал его сетевое пространство, а также чтобы у контейнера не было бы своего собственного IP-адреса?*
+
+```
+host
+```
+
+❓*Как узнать подсеть и шлюз сети `3afa2bbcfce8`?*
+
+- [ ] docker network ls --no-trunc
+- [x] docker inspect 3afa2bbcfce8
+- [ ] docker info 3afa2bbcfce8
+- [x] docker network inspect 3afa2bbcfce8
+
+❓*Что из приведенных команд создаст пользовательскую мостовую сеть с названием `stage-ns`? (Выбери 3)*
+
+- [x] docker network create stage-ns
+- [ ] docker create network stage-ns
+- [x] docker network create --driver bridge stage-ns
+- [x] docker network create -d bridge stage-ns
+- [ ] docker network create --type bridge stage-ns
+
+❓*Какая команда подключит работающий контейнер с именем `feature` к существующей мостовой сети `stage-ns`?*
+
+```
+docker network connect stage-ns feature
+```
+
+❓*Какая команда отключит работающий контейнер с именем `feature` от мостовой сети `stage-ns`?*
+
+```
+docker network disconnect stage-ns feature
+```
+
+❓*Как можно удалить все неиспользуемые сети?*
+
+```
+docker network prune
+```
+
+❓*Как удалить сеть `stage-ns`?*
+
+```
+docker network rm stage-ns
 ```
 ---
 # ✳ **7.3 Тест: Docker Registry**
 
-❓**
+❓*Ты логинишься при помощи команды `docker login` , данные для аутентификации сохраняются локально. Где находятся эти креденшилс?*
 
 ```
+$HOME/.docker/config.json
+```
 
+❓*Что из этого верный адрес для докер-образа, имя которого `webapp-rockets`, а организация, владеющая этим образом `rocketcorp`, держит его в приватном реджистри по адресу `registry.group-x.money`?*
+
+```
+registry.group-x.money/rocketcorp/webapp-rockets
+```
+
+❓*Какая команда используется для поиска образов с именем, содержащим в себе `nginx` , и по крайней мере с 15 звездами? Мы хотим ограничить вывод тремя строками.*
+
+```
+registry.group-x.money/rocketcorp/webapp-rockets
+```
+
+❓*Какая команда поможет в поиске официального образа `httpd`?*
+
+```
+docker search --filter is-official=true httpd
+```
+
+❓*Что из этого пользователь (аккаунт) и образ (репозиторий) в образе `grafana/alpine`?*
+
+```
+user=grafana, image=alpine
+```
+
+❓*Выбери особенности docker trusted registry (DTR).*
+
+- [x] Подпись образов
+- [x] Встроенный контроль доступа
+- [ ] Помощь в подготовке облачной инфраструктуры
+- [ ] Масштабирование приложений
+- [x] Сканирование образов
+- [x] Управление образами и заданиями
+
+❓*Какой командой можно получить список локальных образов,  имеющих метку **`org.opencontainers.image.title`**?*
+
+```
+docker images --filter "label=org.opencontainers.image.title"
+```
+
+❓*Какой командой можно изменить тег `webserver:latest` на `webserver:httpd`? (Выбери 2)*
+
+- [ ] docker container image tag webserver:latest webserver:httpd
+- [x] docker tag webserver:latest webserver:httpd
+- [x] docker image tag webserver:latest webserver:httpd
+- [ ] docker image retag webserver:latest httpd
+
+❓*Какой командой можно загрузить образ в приватный реджистри?*
+
+```
+docker push <private-registry-address>/<username>/<repo-name>
+```
+
+❓*Ты запускаешь команду `docker pull rotorocloud/cosign`, но получаешь ошибку. В чем дело?*
+
+```
+У образа rotorocloud/cosign в реестре нет тега latest
 ```
